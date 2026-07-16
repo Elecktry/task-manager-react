@@ -1,6 +1,43 @@
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
+    const [tarefas, setTarefas] = useState(() => {
+        const tarefasSalvas = localStorage.getItem("tarefas");
+
+        if (tarefasSalvas) {
+            return JSON.parse(tarefasSalvas);
+        }
+
+        return [];
+    });
+    const [textoTarefa, setTextoTarefa] = useState("");
+
+    useEffect(() => {
+        localStorage.setItem(
+            "tarefas",
+            JSON.stringify(tarefas)
+        );
+    }, [tarefas]);
+
+    function adicionarTarefa(event) {
+        event.preventDefault();
+
+        if (textoTarefa.trim() === "") {
+            alert("Digite uma tarefa.");
+            return;
+        }
+
+        const novaTarefa = {
+            id: Date.now(),
+            texto: textoTarefa,
+            concluida: false
+        };
+
+        setTarefas([...tarefas, novaTarefa]);
+        setTextoTarefa("");
+    }
+
     return (
         <main className="container">
             <section className="task-card">
@@ -11,10 +48,12 @@ function App() {
                     </div>
                 </header>
 
-                <form className="task-form">
+                <form className="task-form" onSubmit={adicionarTarefa}>
                     <input
                         type="text"
                         placeholder="Digite uma tarefa..."
+                        value={textoTarefa}
+                        onChange={(event) => setTextoTarefa(event.target.value)}
                     />
 
                     <button type="submit">
@@ -54,17 +93,19 @@ function App() {
                 </section>
 
                 <ul className="task-list">
-                    <li className="task-item">
-                        <label>
-                            <input type="checkbox" />
-                            <span>Estudar React</span>
-                        </label>
+                    {tarefas.map((tarefa) => (
+                        <li className="task-item" key={tarefa.id}>
+                            <label>
+                                <input type="checkbox" />
+                                <span>{tarefa.texto}</span>
+                            </label>
 
-                        <div className="task-actions">
-                            <button type="button">Editar</button>
-                            <button type="button">Excluir</button>
-                        </div>
-                    </li>
+                            <div className="task-actions">
+                                <button type="button">Editar</button>
+                                <button type="button">Excluir</button>
+                            </div>
+                        </li>
+                    ))}
                 </ul>
             </section>
         </main>
